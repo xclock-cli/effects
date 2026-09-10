@@ -93,6 +93,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e6e4313cd5fcd3dad5cafa179702e2b244f760991f45397d14d4ebf38247da75"
 
 [[package]]
+name = "xclock-effect-bar-shimmer"
+version = "0.1.0"
+dependencies = [
+ "xclock-effects-lib",
+]
+
+[[package]]
 name = "xclock-effect-decrypt"
 version = "0.1.0"
 dependencies = [
@@ -116,7 +123,7 @@ dependencies = [
 [[package]]
 name = "xclock-plugin-api"
 version = "0.1.0"
-source = "git+https://github.com/xclock-cli/api#ea548f96a51cf3b4ddd3603fc14cb75b9becc346"
+source = "git+https://github.com/xclock-cli/api#2764f3f12e57405cba76f018a98402871919c28d"
 dependencies = [
  "serde",
  "serde_json",

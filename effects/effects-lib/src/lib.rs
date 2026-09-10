@@ -3,11 +3,38 @@
 //! Effects are executables that respond with animation frames. This crate
 //! re-exports the plugin protocol types and provides common frame builders.
 
-pub use xclock_plugin_api::{Frame, Response, read_request, serde_json, write_response};
+pub use xclock_plugin_api::{
+    EffectTarget, Frame, Request, Response, read_request, serde_json, write_response,
+};
 
 use serde_json::Value;
 
 const GLYPHS: &[char] = &['#', '@', '%', '&', '*', '+', '=', '-', '.', ':', '?', '!'];
+
+/// Builds a progress bar line of exactly `width` characters.
+pub fn bar_line(width: usize, progress: f64, fill: char, empty: char) -> String {
+    let width = width.max(1);
+    let filled = (progress.clamp(0.0, 1.0) * width as f64).round() as usize;
+
+    let mut text = String::with_capacity(width);
+    for position in 0..width {
+        text.push(if position < filled { fill } else { empty });
+    }
+    text
+}
+
+/// Progress reported by the kernel for `bar` effects.
+pub fn request_progress(request: &Request) -> f64 {
+    request.context.progress.unwrap_or(0.0).clamp(0.0, 1.0)
+}
+
+/// Width requested by the kernel for the effect output.
+pub fn request_width(request: &Request, default: usize) -> usize {
+    match request.context.width {
+        0 => default,
+        width => width as usize,
+    }
+}
 
 /// Reads a list of lines from effect args, falling back to a demo line.
 pub fn lines_from_args(args: &Value) -> Vec<String> {
@@ -135,5 +162,41 @@ mod tests {
             delay_from_args(&serde_json::json!({ "delay_ms": 10 }), 80),
             10
         );
+    }
+
+    #[test]
+    fn bar_line_fills_proportionally() {
+        assert_eq!(bar_line(8, 0.5, '#', '-'), "####----");
+        assert_eq!(bar_line(4, 0.0, '#', '-'), "----");
+        assert_eq!(bar_line(4, 1.5, '#', '-'), "####");
+    }
+
+    #[test]
+    fn request_helpers_read_context() {
+        let request: Request = serde_json::from_str(
+            r#"{
+                "version": 1,
+                "kind": "effect",
+                "target": "bar",
+                "args": {},
+                "context": { "now": "now", "width": 12, "height": 1, "progress": 0.25 }
+            }"#,
+        )
+        .unwrap();
+
+        assert_eq!(request.target, EffectTarget::Bar);
+        assert_eq!(request_progress(&request), 0.25);
+        assert_eq!(request_width(&request, 8), 12);
+
+        let fallback: Request = serde_json::from_str(
+            r#"{
+                "version": 1,
+                "kind": "effect",
+                "args": {},
+                "context": { "now": "now", "width": 0, "height": 1 }
+            }"#,
+        )
+        .unwrap();
+        assert_eq!(request_width(&fallback, 8), 8);
     }
 }

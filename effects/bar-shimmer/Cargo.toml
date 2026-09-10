@@ -1,0 +1,14 @@
+[package]
+name = "xclock-effect-bar-shimmer"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+description = "Progress bar shimmer effect for xclock."
+repository = "https://github.com/xclock-cli/effects"
+
+[[bin]]
+name = "bar-shimmer"
+path = "src/main.rs"
+
+[dependencies]
+xclock-effects-lib = { path = "../effects-lib" }

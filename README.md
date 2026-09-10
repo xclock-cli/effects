@@ -13,6 +13,38 @@ the core.
 |--------|-------------|------|
 | `decrypt` | Reveals text through random glyphs | `lines`, `delay_ms`, `seed` |
 | `typewriter` | Reveals text character by character | `lines`, `delay_ms` |
+| `bar-shimmer` | Animated progress bar with a moving highlight | `fill`, `empty`, `shimmer`, `delay_ms` |
+
+## Targets
+
+The kernel tells each effect where it is rendered through the `target` field
+of the request:
+
+| Target | Rendered in |
+|--------|-------------|
+| `bar` | The progress bar of a widget, with `context.progress` set |
+| `widget` | The inner area of the widget at `path` in the layout |
+| `layout` | Over the whole dashboard |
+
+Configure effects in the kernel config:
+
+```jsonc
+{
+  "effects": [
+    {
+      "name": "bar-shimmer",
+      "target": "bar",
+      "path": [1],
+      "refresh_secs": 1
+    },
+    {
+      "name": "decrypt",
+      "target": "layout",
+      "args": { "lines": ["focus time"], "delay_ms": 60 }
+    }
+  ]
+}
+```
 
 ## Use
 
